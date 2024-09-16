@@ -3,14 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 enum Role {
   ADMIN
-  USER
+  SELLER
+  CUSTOMER
 }
 
 enum OrderStatus {
@@ -33,39 +34,47 @@ enum TokenType {
 }
 
 model User {
-  id        String   @id @default(uuid()) // UUID for user id
-  email     String   @unique
+  id        String    @id @default(uuid())
+  email     String    @unique
   password  String
-  role      Role     @default(USER) // Role-based access control
-  isAdmin   Boolean  @default(false)
+  role      Role      @default(CUSTOMER)
   name      String?
   carts     Cart[]
   payments  Payment[]
   tokens    Token[]
   orders    Order[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([email])
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   description String?
   price       Float
-  stock       Int      @default(0)
-  carts       CartItem[]
-  orders      OrderItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  stock       Int         @default(0)
+  sellerId    String
+  seller      User        @relation(fields: [sellerId], references: [id])
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([sellerId])
 }
 
 model Cart {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
   items     CartItem[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
 }
 
 model CartItem {
@@ -73,33 +82,40 @@ model CartItem {
   productId Int
   cartId    Int
   quantity  Int      @default(1)
+  price     Float
   product   Product  @relation(fields: [productId], references: [id])
   cart      Cart     @relation(fields: [cartId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([productId, cartId])
 }
 
 model Payment {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   userId    String
   orderId   Int
-  user      User     @relation(fields: [userId], references: [id])
-  order     Order    @relation(fields: [orderId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
+  order     Order         @relation(fields: [orderId], references: [id])
   amount    Float
   method    String
   status    PaymentStatus @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId, orderId])
 }
 
 model Token {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   userId    String
-  token     String   @unique
+  token     String    @unique
   type      TokenType
   expiresAt DateTime
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+
+  @@index([userId, type])
 }
 
 model OrderItem {
@@ -107,20 +123,23 @@ model OrderItem {
   productId Int
   orderId   Int
   quantity  Int      @default(1)
+  price     Float
   product   Product  @relation(fields: [productId], references: [id])
   order     Order    @relation(fields: [orderId], references: [id])
+
+  @@index([productId, orderId])
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
   payments  Payment[]
   items     OrderItem[]
   status    OrderStatus @default(PENDING)
   total     Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId])
 }
-
-

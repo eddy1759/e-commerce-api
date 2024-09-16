@@ -5,9 +5,8 @@ export class User implements PrismaUser {
     id: string;
     email: string;
     password: string;
-    name: string | null; // Handle nullable name
-    role: Role; // Use the Role enum from Prisma
-    isAdmin: boolean;
+    name: string | null;
+    role: Role; 
     createdAt: Date;
     updatedAt: Date;
 
@@ -15,11 +14,18 @@ export class User implements PrismaUser {
         this.id = user.id;
         this.email = user.email;
         this.password = user.password;
-        this.name = user.name; // Nullable field
-        this.role = user.role; // Use Prisma Role enum
-        this.isAdmin = user.isAdmin;
+        this.name = user.name; 
+        this.role = user.role; 
         this.createdAt = user.createdAt;
         this.updatedAt = user.updatedAt;
+    }
+
+    isAdmin(): boolean {
+        return this.role === Role.ADMIN;
+    }
+
+    isSeller(): boolean {
+        return this.role === Role.SELLER;
     }
 
     static async hashPassword(password: string): Promise<string> {

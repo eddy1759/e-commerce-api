@@ -5,6 +5,7 @@ export class CartItem implements PrismaCartItem {
     cartId: number;
     productId: number;
     quantity: number;
+    price: number; 
     createdAt: Date;
     updatedAt: Date;
 
@@ -13,6 +14,7 @@ export class CartItem implements PrismaCartItem {
         this.cartId = cartItem.cartId;
         this.productId = cartItem.productId;
         this.quantity = cartItem.quantity;
+        this.price = cartItem.price;
         this.createdAt = cartItem.createdAt;
         this.updatedAt = cartItem.updatedAt;
     }
@@ -25,4 +27,5 @@ export class CartItem implements PrismaCartItem {
         const cartItem = await prisma.create({ data });
         return new CartItem(cartItem);
     }
+
 }

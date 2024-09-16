@@ -6,6 +6,7 @@ export class Product implements PrismaProduct {
     description: string | null;
     price: number;
     stock: number;
+    sellerId: string;
     createdAt: Date;
     updatedAt: Date;
 
@@ -15,8 +16,13 @@ export class Product implements PrismaProduct {
         this.description = product.description;
         this.price = product.price;
         this.stock = product.stock;
+        this.sellerId = product.sellerId;
         this.createdAt = product.createdAt;
         this.updatedAt = product.updatedAt;
+    }
+
+    isInStock(): boolean {
+        return this.stock > 0;
     }
 
     toJSON(): Partial<Product> {
@@ -26,5 +32,9 @@ export class Product implements PrismaProduct {
     static async create(data: Prisma.ProductCreateInput, prisma: Prisma.ProductDelegate): Promise<Product> {
         const product = await prisma.create({ data });
         return new Product(product);
+    }
+
+    calculateDiscountedPrice(discountPercentage: number): number {
+        return this.price * (1 - (discountPercentage /100));
     }
 }

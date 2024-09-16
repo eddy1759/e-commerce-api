@@ -29,4 +29,16 @@ export class Payment implements PrismaPayment {
         const payment = await prisma.create({ data });
         return new Payment(payment);
     }
+
+    isCompleted(): boolean {
+        return this.status === PaymentStatus.COMPLETED;
+    }
+
+    isPending(): boolean {
+        return this.status ===PaymentStatus.PENDING;
+    }
+
+    isFailed(): boolean {
+        return this.status === PaymentStatus.FAILED;
+    }
 }

@@ -1,6 +1,8 @@
 export enum Role {
     ADMIN = 'admin',
-    USER = 'user'
+    USER = 'user',
+    SELLER = 'seller',
+    CUSTOMER = 'customer'
 }
 
 export enum PaymentStatus {
